@@ -34,22 +34,38 @@ unsigned int xor_nibble(unsigned int nibble1, unsigned int nibble2)
     return nibble1 ^ nibble2;
 }
 
-
-
 uint64_t injectNibbles(uint32_t n)
 {
     unsigned int nibble1,nibble2,nibble3;
     uint64_t final_number=0;
     for (unsigned int i=0; i<8; i++)
     {
+        // extract nibble i (positions: 0 to 7)
         nibble1=extract_nibble(n,i);
-       // printf("nibble 1  %x \n", nibble1);
+
+        // next nibble 
         if(i==7) nibble2=extract_nibble(n,0);
         else nibble2=extract_nibble(n,i+1);
-        // printf("nibble 2  %x \n", nibble2);
-        nibble3=xor_nibble(nibble1,nibble2);
-        // printf("nibble 3  %x \n", nibble3);
 
+        // XOR between current nibble and next nibble
+        nibble3=xor_nibble(nibble1,nibble2);
+
+         /*
+            now place two nibbles inside byte i of the 64-bit number:
+
+            byte i starts at bit position:   i * 8
+
+            inside that byte:
+                - lower nibble occupies bits 0–3
+                - upper nibble occupies bits 4–7
+
+            which means:
+                nibble1 → shifted left by (i*8)
+                nibble3 → shifted left by (i*8 + 4)
+        */
+
+
+        // if we dont cast the nibble to 64 bit, it reamins in 32 bit and shifting by i*8 could overflow or lose upper bits
         final_number = final_number | ((uint64_t)nibble1 << i*8);
         final_number = final_number | ((uint64_t)nibble3 << (i*8+4));
 
@@ -63,6 +79,7 @@ int main()
     uint32_t n=306742305;
     unsigned int pos=3;
     printf("The nr 0x%x has the nibble %d = 0x%x \n", n,pos,extract_nibble(n,pos));
+    
     printf("The nr 0x%x has the inject nibble value 0x%llx", n,injectNibbles(n));
     return 0;
 }
