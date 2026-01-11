@@ -13,15 +13,10 @@ The function should return the number of integers successfully stored. Stop read
 #include <ctype.h>  // for isdigit
 #include <stdbool.h>
 
-bool is_valid_delimiter(char c) {
-    return (c == ' ' || c == '\0');
-}
-
  // scans string 's', finds integers strictly delimited by spaces/start/end and uses strtol to parse them.
-int read_ints(const char *s, int ints[], int capacity) {
+int read_ints( char *s, int ints[], int capacity) {
     int count = 0;
-    char *end_ptr; // point to the character AFTER the number strtol reads
-    const char *curr = s;
+    char *curr = s;
 
     // loop until end of string or array is full
     while (*curr != '\0' && count < capacity) {
@@ -33,7 +28,8 @@ int read_ints(const char *s, int ints[], int capacity) {
             int left_ok=0;
             if((curr == s) || isspace(*(curr - 1)))
                 left_ok=1;
-
+            
+            char *end_ptr; // point to the character AFTER the number strtol reads
             // strtol reads the number and sets 'end_ptr' to the character where it stopped
             long num = strtol(curr, &end_ptr, 10);
 
