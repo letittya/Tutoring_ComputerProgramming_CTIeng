@@ -1,3 +1,5 @@
 John doe, 15,    93
 Mary Jane Penne,    1, 12
 Andrew  Pong,      90, 55
+Ana maria, 155, 15
+Zoe, 90,  55

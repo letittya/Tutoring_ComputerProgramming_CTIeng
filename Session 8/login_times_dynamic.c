@@ -8,13 +8,15 @@ Constraints: A line has a maximum of 100 characters.
 
 Goal: Print the data from the file in descending order of their last login time (hh, mm), breaking ties 
 (when the last login time is the same) by username.
+
+Solve it using dynamic allocation and qsort function. 
 */
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h> // added for malloc/realloc/free and qsort
 
 // constants
-#define MAX_USERS 100
 #define MAX_NAME_LEN 101
 
 // structure definition
@@ -29,45 +31,24 @@ int calculateMinutes(UserLogin user) {
     return (user.hh * 60) + user.mm;
 }
 
-// sorts the array directly
-void sortUsers(UserLogin users[], int count) {
-    int i, j;
-    UserLogin temp; 
-    
-    // Loop 1
-    for (i = 0; i < count - 1; i++) {
-        
-        // Loop 2
-        for (j = i + 1; j < count; j++) {
-            
-            int timeI = calculateMinutes(users[i]); 
-            int timeJ = calculateMinutes(users[j]); 
-            
-            // we want the LATEST time (Biggest Number) at the top.
-            // so if (j) is BIGGER than the Current (i), SWAP them.
-            
-            int shouldSwap = 0;
-            
-            // 1. Primary Check: Time
-            if (timeJ > timeI) {
-                shouldSwap = 1;
-            }
-            // Times are equal -> Check Name (A-Z)
-            // if times are equal AND Name J comes BEFORE Name I (smaller), swap.
-            else if (timeJ == timeI) {
-                 if (strcmp(users[i].username, users[j].username) < 0) {
-                     shouldSwap = 1;
-                 }
-            }
-            
-            // EXECUTE SWAP
-            if (shouldSwap == 1) {
-                temp = users[i];
-                users[i] = users[j];
-                users[j] = temp;
-            }
-        }
-    }
+// sorts the array through qsort
+int compareUsers(const void *a, const void *b) {
+    // 1. cast generic void pointers to the type we need
+    UserLogin *u1 = (UserLogin *)a;
+    UserLogin *u2 = (UserLogin *)b;
+
+    // 2. get the values we need to compare
+    // calculateMinutes expects a struct, so we dereference (*u1)
+    int time1 = calculateMinutes(*u1);
+    int time2 = calculateMinutes(*u2);
+
+    // 3. primary Sort: by TIME (Descending - Big numbers first)
+    if (time1 > time2) return -1; // time1 is bigger, so it comes FIRST
+    if (time1 < time2) return 1;  // time1 is smaller, so it comes AFTER
+
+    // 4. secondary Sort: NAME 
+    // strcmp returns negative 
+    return strcmp(u2->username, u1->username);
 }
 
 // prints the list
@@ -85,7 +66,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    UserLogin users[MAX_USERS];
+    // MALLOC: Initial allocation for the array (start with a small capacity) [cite: 3]
+    int capacity = 2;
+    UserLogin *users = malloc(capacity * sizeof(UserLogin));
+    if (users == NULL) {
+        printf("Memory allocation failed\n");
+        return 1;
+    }
+
     int count = 0;
 
     // 2. open the file
@@ -93,12 +81,25 @@ int main(int argc, char *argv[]) {
     
     if (f == NULL) {
         printf("error opening file.\n");
+        free(users);
         return 1;
     }
 
     // 3. READ USERS
-    while (count < MAX_USERS) {
+    while (1) { // loop runs until file end, handling size dynamically 
         
+        // REALLOC: Check if we need more space before reading 
+        if (count >= capacity) {
+            capacity = capacity * 2; // double the capacity
+            //printf("We did a realloc here \n");
+            UserLogin *temp = realloc(users, capacity * sizeof(UserLogin));
+            if (temp == NULL) {
+                printf("Memory reallocation failed\n");
+                break; // or handle error appropriately or return 
+            }
+            users = temp;
+        }
+
         // attempt to read
         int result = fscanf(f, " %100[^,], %d, %d", users[count].username, &users[count].hh, &users[count].mm);
         
@@ -111,7 +112,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (count > 0) {
-        sortUsers(users, count);
+        // QSORT arguments: Array, Number of items, Size of one item, Comparison Logic
+        qsort(users, count, sizeof(UserLogin), compareUsers);
         printUsers(users, count);
     } else {
         printf("no users found.\n");
@@ -119,6 +121,8 @@ int main(int argc, char *argv[]) {
 
      // 4. close the file 
     fclose(f);
+    // 5. free the allocated memory 
+    free(users);
 
     return 0;
 }
