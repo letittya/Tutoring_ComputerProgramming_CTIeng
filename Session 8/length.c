@@ -15,48 +15,47 @@ Tie-Breaker: If two lines have the same length, place those lines which start wi
 #define MAX_LEN 256
 
 
-// Calculates length of line excluding leading whitespace
+// calc length of line excluding leading whitespace
 int getLength(char str[]) {
     int i = 0;
     int len = strlen(str);
     
-    // Skip spaces at the start
+    // skip spaces at the start
     while (isspace(str[i])) {
         i++;
     }
     
-    // Effective length is total length minus skipped spaces
+    // length is total length minus skipped spaces
     return len - i;
 }
 
-// Checks if the first non-space character is '{'
+// check if the first non-space character is '{'
 int isBrace(char str[]) {
     int i = 0;
     
-    // Skip spaces
+    // skip spaces 
     while (isspace(str[i])) {
         i++;
     }
     
-    // Return 1 (true) if it is a brace, 0 (false) otherwise
+    // ret 1 (true) if it is a brace, 0 (false) otherwise
     if (str[i] == '{') {
         return 1;
     }
     return 0;
 }
 
-// Reads from an ALREADY OPEN file into a 2d array
-// Returns the number of lines read
+// ret the number of lines read
 int readLines(FILE *f, char lines[][MAX_LEN], int maxLimit) {
     int count = 0;
     
-    // Safety check for the pointer
+    // safety check
     if (f == NULL) {
         return 0;
     }
     
     while (count < maxLimit && fgets(lines[count], MAX_LEN, f) != NULL) {
-        // Ensure every line ends with '\n' to prevent printing issues
+        // ensure every line ends with '\n' to prevent printing issues
         int len = strlen(lines[count]);
         if (len > 0 && lines[count][len - 1] != '\n') {
             lines[count][len] = '\n';
@@ -69,31 +68,30 @@ int readLines(FILE *f, char lines[][MAX_LEN], int maxLimit) {
     return count;
 }
 
-// Bubble sort with primary (Length) and secondary (Brace) conditions
+// bubble sort with primary (Length) and secondary (Brace) conditions
 void sortLines(char lines[][MAX_LEN], int count) {
     int i, j;
-    char temp[MAX_LEN]; // Temporary buffer for swapping
+    char temp[MAX_LEN]; // for swaps
     
     for (i = 0; i < count - 1; i++) {
         for (j = 0; j < count - 1 - i; j++) {
             
             int lenA = getLength(lines[j]);
             int lenB = getLength(lines[j+1]);
-            int swap = 0; // Flag: 0 = No Swap, 1 = Swap
+            int swap = 0; // flag means 0 = No Swap, 1 = Swap
             
-            // 1. Primary Sort: Length (Shortest first)
+            // length sorting
             if (lenA > lenB) {
                 swap = 1;
             }
-            // 2. Tie-Breaker: Lengths are equal
+            // equal length
             else if (lenA == lenB) {
-                // If the neighbor (j+1) has a brace and current (j) doesn't...
+                // if neighbor (j+1) has a brace and current (j) doesn't
                 if (isBrace(lines[j+1]) && !isBrace(lines[j])) {
-                    swap = 1; // Move the brace up
+                    swap = 1; 
                 }
             }
             
-            // Execute Swap
             if (swap) {
                 strcpy(temp, lines[j]);
                 strcpy(lines[j], lines[j+1]);
@@ -115,19 +113,19 @@ int main() {
     char lines[MAX_LINES][MAX_LEN];
     int count = 0;
     
-    // 1. Open the file inside main
+    // 1. open the file 
     FILE *f = fopen("sample.c", "r");
     
-    // 2. Check if file exists immediately
+    // 2. check file
     if (f == NULL) {
         printf("Error: Could not open file 'sample.c'.\n");
         return -1;
     }
     
-    // 3. Pass the open file to the reader
+    // 3. pass the open file to the reader
     count = readLines(f, lines, MAX_LINES);
     
-    // 5. Process and Print
+    // 4. process and Print
     if (count > 0) {
         
         sortLines(lines, count);
@@ -137,7 +135,7 @@ int main() {
         printf("File is empty.\n");
     }
 
-     // 4. Close the file 
+     // 5. close file
     fclose(f);
     
     return 0;

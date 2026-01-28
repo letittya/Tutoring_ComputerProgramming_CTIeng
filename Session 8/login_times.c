@@ -43,8 +43,8 @@ void sortUsers(UserLogin users[], int count) {
             int timeI = calculateMinutes(users[i]); 
             int timeJ = calculateMinutes(users[j]); 
             
-            // We want the LATEST time (Biggest Number) at the top.
-            // So if (j) is BIGGER than the Current (i), SWAP them.
+            // we want the LATEST time (Biggest Number) at the top.
+            // so if (j) is BIGGER than the Current (i), SWAP them.
             
             int shouldSwap = 0;
             
@@ -52,8 +52,8 @@ void sortUsers(UserLogin users[], int count) {
             if (timeJ > timeI) {
                 shouldSwap = 1;
             }
-            // 2. Tie-Breaker: Times are equal -> Check Name (A-Z)
-            // If times are equal AND Name J comes BEFORE Name I (smaller), swap.
+            // Times are equal -> Check Name (A-Z)
+            // if times are equal AND Name J comes BEFORE Name I (smaller), swap.
             else if (timeJ == timeI) {
                  if (strcmp(users[j].username, users[i].username) < 0) {
                      shouldSwap = 1;
@@ -100,7 +100,6 @@ int main(int argc, char *argv[]) {
     while (count < MAX_USERS) {
         
         // attempt to read
-        // Note: We use 'f' because that is the name of our FILE pointer
         int result = fscanf(f, " %100[^,], %d, %d", users[count].username, &users[count].hh, &users[count].mm);
         
         // did we successfully find exactly 3 items?
