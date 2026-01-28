@@ -1,0 +1,5 @@
+Mac 9.42
+Bart   10
+Ana 9.42
+Popescu  3
+Bobby 5.05
